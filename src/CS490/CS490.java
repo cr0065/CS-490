@@ -5,6 +5,8 @@
  */
 package CS490;
 
+import java.io.IOException;
+
 /**
  *
  * @author aceth
@@ -48,7 +50,7 @@ public class CS490 extends javax.swing.JFrame {
 
         jButton1.setText("Start System");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            public void actionPerformed(java.awt.event.ActionEvent evt){
                 jButton1ActionPerformed(evt);
             }
         });
@@ -208,10 +210,22 @@ public class CS490 extends javax.swing.JFrame {
         // TODO add your handling code here:
         jLabel1.setText("System Running");
         String x = jTextField1.getText();
+        int i = 0;
         if(jTextField1.getText().equals("")){ 
-            jTextPane1.setText("No Value Entered for Calc"); 
+            jTextPane1.setText("No Value Entered for Calc");
+            i = 0;
         }
-        int i = Integer.parseInt(x); 
+        else
+        {
+            i = Integer.parseInt(x);
+        }
+        processQueue q = new processQueue();
+        try {
+            q.threader();
+        }catch (IOException ex)
+        {
+            System.out.println("IO ERROR");
+        }
         while(i <= 20) {
             jTextPane1.setText(jTextPane1.getText() + i + "\n"); 
             i++;
