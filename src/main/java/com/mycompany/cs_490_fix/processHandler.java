@@ -1,4 +1,4 @@
-package CS490;
+package com.mycompany.cs_490_fix;
 
 public class processHandler implements Runnable {
     Process ownedProcess;
@@ -7,6 +7,7 @@ public class processHandler implements Runnable {
         ownedProcess = p;
     }
 
+    @Override
     public void run()
     {
 

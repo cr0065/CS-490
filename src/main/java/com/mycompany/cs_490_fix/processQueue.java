@@ -1,7 +1,6 @@
-package CS490;
+package com.mycompany.cs_490_fix;
 
 import java.io.*;
-import java.lang.*;
 import java.util.*;
 
 public class processQueue extends Thread {
