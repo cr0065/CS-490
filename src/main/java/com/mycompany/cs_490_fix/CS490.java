@@ -7,9 +7,11 @@ package com.mycompany.cs_490_fix;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -87,6 +89,10 @@ public class CS490 extends javax.swing.JFrame {
         ));
         jTable1.setRowHeight(26);
         jScrollPane2.setViewportView(jTable1);
+        if (jTable1.getColumnModel().getColumnCount() > 0) {
+            jTable1.getColumnModel().getColumn(0).setResizable(false);
+            jTable1.getColumnModel().getColumn(1).setResizable(false);
+        }
 
         jPanel2.setBackground(new java.awt.Color(204, 154, 19));
 
@@ -241,6 +247,7 @@ public class CS490 extends javax.swing.JFrame {
             jTextPane1.setText(jTextPane1.getText() + i + "\n"); 
             i++;
         }
+        os.startOS(x);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -272,6 +279,30 @@ public class CS490 extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_loadFileButtonActionPerformed
 
+    public void updateWaitingProcessQueue(Queue<Process> arrivedProcessQueue)
+    {
+        //Trying to write the Waiting Process Queue to The table
+        
+        /*int i = 0;
+        Object[][] data = new Object[5][2];
+        String[] cols = {"Process Name", "Service Time"};
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        for(Process proc : arrivedProcessQueue){
+            String name = proc.getProcessID();
+            int sTime = proc.getServiceTime();
+            if(i < 5)
+            {
+                data[i][0] = name;
+                data[i][1] = sTime;
+                //model.setDataVector(data, cols);
+            }
+            i++;
+
+        }
+        DefaultTableModel tm = new DefaultTableModel(data, cols);
+        jTable1.setModel(tm); */
+    }
+    
     /**
      * @param args the command line arguments
      */

@@ -16,18 +16,19 @@ import java.util.*;
 public class OS extends Thread{
     
     private Boolean pauseOS = false;
+    private Boolean idleOS = false;
     
     int totalSystemTime = 0;
     
     List<Process> unarrivedProcesses = new ArrayList<Process>();
-    static Queue<Process> arrivedProcessQueue = new LinkedList<Process>();
+    Queue<Process> arrivedProcessQueue = new LinkedList<Process>();
     
     public OS()
     {
         
     }
     
-    public void startOS()
+    public void startOS(String x)
     {
 
         pauseOS = false;
@@ -42,12 +43,11 @@ public class OS extends Thread{
     
     public void osLoop()
     {
-        
 
         while(!pauseOS)
         {
-            
-            while(!unarrivedProcesses.isEmpty())
+            checkForArrivedProcs();
+            /*while(!unarrivedProcesses.isEmpty())
             {
                 try {
                     processHandler r = new processHandler(unarrivedProcesses.remove(MIN_PRIORITY));
@@ -56,7 +56,7 @@ public class OS extends Thread{
                 } catch (NoSuchElementException e) {
                     //   break;
                 }
-            }
+            }*/
             totalSystemTime++;
         }
     }
@@ -86,19 +86,37 @@ public class OS extends Thread{
         for(Process proc : unarrivedProcesses){
 			System.out.println(proc.getArrivalTime() + proc.getProcessID() + proc.getServiceTime() + proc.getPriority());
         }
+
     }
     
     public void checkForArrivedProcs()
     {
-        for(Process proc : unarrivedProcesses){
-            if( totalSystemTime >= proc.getArrivalTime())
-            {
-                arrivedProcessQueue.add(proc);
-                unarrivedProcesses.remove(proc);
-                // Create an update display function and pass to main GUI
+        if(!unarrivedProcesses.isEmpty())
+        {
+            
+            Iterator<Process> itr = unarrivedProcesses.iterator(); 
+            while (itr.hasNext()) 
+            { 
+                Process proc = itr.next(); 
+                if( totalSystemTime >= proc.getArrivalTime())
+                {
+                    arrivedProcessQueue.add(proc);
+                    itr.remove();
+                }
             }
-        }
 
+
+            
+            /*for(Process proc : unarrivedProcesses){
+                if( totalSystemTime >= proc.getArrivalTime())
+                {
+                    arrivedProcessQueue.add(proc);
+                    unarrivedProcesses.removeIf();
+                }
+            }*/
+            CS490 c = new CS490();
+            c.updateWaitingProcessQueue(arrivedProcessQueue);
+        }
     }
     
 }

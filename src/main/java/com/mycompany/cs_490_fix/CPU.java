@@ -4,15 +4,21 @@
  */
 package com.mycompany.cs_490_fix;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 /**
  *
  * @author Samuel
  */
 public class CPU {
-        
+    
+    private Queue<Process> processQueue = new LinkedList<Process>();
+    
     public CPU()
     {
         
     }
+    
     
 }
