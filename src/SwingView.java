@@ -146,37 +146,52 @@ public class SwingView extends JComponent implements PropertyChangeListener
 
     public void parseFile()
     {
-        Scanner input;
-        try {
-            input = new Scanner(new File("src/test.txt"));
-        }
-        catch(FileNotFoundException e)
-        {
-            e.printStackTrace();
-            return;
-        }
 
-        input.useDelimiter(",|\\n");
-
-        while (input.hasNext())
-        {
-            {
-                int arrivalTime = Integer.parseInt(input.next().trim());
-                String name = input.next();
-                int length = Integer.parseInt(input.next().trim());
-                int priority = Integer.parseInt(input.next().trim());
-
-                new java.util.Timer().schedule(
-                        new java.util.TimerTask() {
-                            @Override
-                            public void run() {
-                                ProcessHandler.instance.addProcess(new Process(name, length, priority));
-                            }
-                        },
-                        arrivalTime * 1000
-                );
+        final JFileChooser fc = new JFileChooser();
+        //In response to a button click:
+        int returnVal = fc.showOpenDialog(SwingView.this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            //This is where a real application would open the file.
+            System.out.println("Opening: " + file.getName());
+            Scanner input;
+            try {
+                input = new Scanner(file);
             }
+            catch(FileNotFoundException e)
+            {
+                e.printStackTrace();
+                return;
+            }
+
+            input.useDelimiter(",|\\n");
+
+            while (input.hasNext())
+            {
+                {
+                    int arrivalTime = Integer.parseInt(input.next().trim());
+                    String name = input.next();
+                    int length = Integer.parseInt(input.next().trim());
+                    int priority = Integer.parseInt(input.next().trim());
+
+                    new java.util.Timer().schedule(
+                            new java.util.TimerTask() {
+                                @Override
+                                public void run() {
+                                    ProcessHandler.instance.addProcess(new Process(name, length, priority));
+                                }
+                            },
+                            arrivalTime * 1000
+                    );
+                }
+            }
+        } else {
+            System.out.println("File dialog closed.");
         }
+
+
+
+
     }
     public void propertyChange(PropertyChangeEvent event)
     {
