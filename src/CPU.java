@@ -9,6 +9,7 @@ public class CPU implements Runnable
         this.isPaused = isPaused;
     }
 
+    // Gets the process and runs it
     public void run()
     {
         while(true) {
@@ -32,7 +33,7 @@ public class CPU implements Runnable
                     }
                 }
             }
-            try {
+            try {   // waits a little to get the next process
                 Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -34,6 +34,7 @@ public class ProcessHandler implements PropertyChangeListener {
         ChangeField.firePropertyChange("processes", null, processes);
     }
 
+    // gets the process and then removes it for the queue
     public Process popProcess()
     {
         if (processes.size() > 0)
@@ -51,13 +52,14 @@ public class ProcessHandler implements PropertyChangeListener {
         ChangeField.addPropertyChangeListener(listener);
     }
 
+    // Changes data with given params
     public void propertyChange(PropertyChangeEvent event)
     {
-        Process p = (Process)event.getNewValue();
+        Process processfromfile = (Process)event.getNewValue();
         for (Process process : processes)
         {
-            if (process.name == p.name)
-                ChangeField.firePropertyChange("cpu1Process", null, p);
+            if (process.name == processfromfile.name)
+                ChangeField.firePropertyChange("cpu1Process", null, processfromfile);
 
         }
         ChangeField.firePropertyChange("processes", null, processes);

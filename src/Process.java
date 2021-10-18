@@ -3,6 +3,7 @@ import java.beans.PropertyChangeSupport;
 import java.time.Duration;
 import java.util.Timer;
 
+// Setters and Getters for everything that you are using in the .txt file
 public class Process {
     public String name;
     private double duration;

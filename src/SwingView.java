@@ -10,9 +10,10 @@ import java.io.FileNotFoundException;
 import java.util.Queue;
 import java.util.Scanner;
 
+// Creates the Main GUI display for the program
 public class SwingView extends JComponent implements PropertyChangeListener
 {
-    DefaultTableModel model;
+    DefaultTableModel ProcessnServiceTime;
     JTextField cpu1Label;
     JTextField currentProcess;
     JTextField timeRemaining;
@@ -21,12 +22,13 @@ public class SwingView extends JComponent implements PropertyChangeListener
     JTextField currentProcess2;
     JTextField timeRemaining2;
 
-    JTextField timeUnitInput;
-    String[] statsHeader = {"Process Name","Arrival Time","Service Time","Finish Time","TAT","nTAT"};
-    DefaultTableModel model1;
+    JTextField TimeUnit;
+    String[] TableHeading = {"Process Name","Arrival Time","Service Time","Finish Time","TAT","nTAT"};
+    DefaultTableModel StatsProcesses;
 
     final String[] colNames = {"Process Name", "Service Time"};
 
+    // Contains all the button declarations and calls to the buttons
     public SwingView()
     {
         JPanel mainPanel = new JPanel();
@@ -57,8 +59,8 @@ public class SwingView extends JComponent implements PropertyChangeListener
         timeRemaining2 = new JTextField("Time Remaining:");
 
         //Process Queue
-        model = new DefaultTableModel(colNames, 0);
-        JTable table = new JTable(model);
+        ProcessnServiceTime = new DefaultTableModel(colNames, 0);
+        JTable table = new JTable(ProcessnServiceTime);
 
         JPanel queuePanel = new JPanel();
 
@@ -68,9 +70,10 @@ public class SwingView extends JComponent implements PropertyChangeListener
         //Time unit field
         JLabel timeUnit = new JLabel("1 time unit (ms) = ");
 
-        timeUnitInput = new JTextField(" ");
-        timeUnitInput.setPreferredSize(new Dimension(40, 20));
-        timeUnitInput.addKeyListener(new KeyListener() {
+        TimeUnit = new JTextField(" ");
+        TimeUnit.setPreferredSize(new Dimension(40, 20));
+
+        TimeUnit.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
             }
@@ -79,11 +82,12 @@ public class SwingView extends JComponent implements PropertyChangeListener
             public void keyPressed(KeyEvent e) {
             }
 
+            // time unit to be processed
             @Override
             public void keyReleased(KeyEvent e) {
                 int timeUnit = 0;
                 try {
-                    timeUnit = Integer.parseInt(timeUnitInput.getText());
+                    timeUnit = Integer.parseInt(TimeUnit.getText());
                 }
                 catch (NumberFormatException ex)
                 {
@@ -92,15 +96,15 @@ public class SwingView extends JComponent implements PropertyChangeListener
             }
         });
 
-        //time unit the little ms thing.
+        // time unit the little ms thing.
         JPanel timePanel = new JPanel();
         timePanel.setLayout(new FlowLayout());
 
-        //CPU PANEL 1
+        // CPU PANEL 1
         JPanel cpuPanel = new JPanel();
         cpuPanel.setLayout(new BoxLayout(cpuPanel, BoxLayout.PAGE_AXIS));
 
-        //CPU PANEL 2
+        // CPU PANEL 2
         JPanel cpuPanel2 = new JPanel();
         cpuPanel2.setLayout(new BoxLayout(cpuPanel2, BoxLayout.PAGE_AXIS));
 
@@ -108,7 +112,7 @@ public class SwingView extends JComponent implements PropertyChangeListener
         adminPanel.setLayout(new GridLayout(2, 1));
 
         timePanel.add(timeUnit);
-        timePanel.add(timeUnitInput);
+        timePanel.add(TimeUnit);
 
         adminPanel.add(timePanel);
 
@@ -130,8 +134,8 @@ public class SwingView extends JComponent implements PropertyChangeListener
 
         JPanel reportPanel = new JPanel();
 
-        model1 = new DefaultTableModel(statsHeader, 0);
-        JTable statsTable = new JTable(model1);
+        StatsProcesses = new DefaultTableModel(TableHeading, 0);
+        JTable statsTable = new JTable(StatsProcesses);
 
         reportPanel.add(new JScrollPane(statsTable));
         reportPanel.setPreferredSize(new Dimension(100,200));
@@ -144,6 +148,7 @@ public class SwingView extends JComponent implements PropertyChangeListener
         parseFile();
     }
 
+    // Parses the file that is chosen
     public void parseFile()
     {
 
@@ -189,22 +194,21 @@ public class SwingView extends JComponent implements PropertyChangeListener
             System.out.println("File dialog closed.");
         }
 
-
-
-
     }
+
+    // Where all the GUI updates would be made
     public void propertyChange(PropertyChangeEvent event)
     {
         Queue<Process> processes = (Queue<Process>)event.getNewValue();
-        int rows = model.getRowCount();
+        int rows = ProcessnServiceTime.getRowCount();
         for (int i = 0; i < rows; i++)
         {
-            model.removeRow(0);
+            ProcessnServiceTime.removeRow(0);
         }
         for (Process process : processes)
         {
-            model.addRow(new String[] { process.name, Double.toString(process.getDuration()) });
+            ProcessnServiceTime.addRow(new String[] { process.name, Double.toString(process.getDuration()) });
         }
-        model.fireTableDataChanged();
+        ProcessnServiceTime.fireTableDataChanged();
     }
 }

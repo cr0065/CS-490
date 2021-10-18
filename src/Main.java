@@ -5,8 +5,14 @@ class Run {
 
     public static void main(String[] args)
     {
-        JFrame swing = SwingPanel.createWindow();
-        swing.add(new SwingView());
-        swing.pack();
+        JFrame window = new JFrame("CS 490 Team 10");
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        window.setResizable(false);
+        window.setLayout(new FlowLayout());
+        window.setVisible(true);
+
+        window.add(new SwingView());
+        window.pack();
     }
 }
