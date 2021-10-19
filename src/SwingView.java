@@ -11,19 +11,19 @@ import java.util.Queue;
 import java.util.Scanner;
 
 // Creates the Main GUI display for the program
-public class SwingView extends JComponent implements PropertyChangeListener
-{
+public class SwingView extends JComponent implements PropertyChangeListener {
     DefaultTableModel ProcessnServiceTime;
-    JTextField cpu1Label;
+    JLabel cpu1Label = new JLabel("CPU #1");
     JTextField currentProcess;
     JTextField timeRemaining;
 
-    JTextField cpu1Label2;
+    JLabel cpu1Label2 = new JLabel("CPU #2");
     JTextField currentProcess2;
     JTextField timeRemaining2;
 
     JTextField TimeUnit;
-    String[] TableHeading = {"Process Name","Arrival Time","Service Time","Finish Time","TAT","nTAT"};
+    JLabel current_throughput = new JLabel("Throughput:    ");
+    String[] TableHeading = {"Process ","Arrival Time","Service Time","Finish Time","TAT","nTAT"};
     DefaultTableModel StatsProcesses;
 
     final String[] colNames = {"Process Name", "Service Time"};
@@ -43,18 +43,16 @@ public class SwingView extends JComponent implements PropertyChangeListener
         pauseButton.addActionListener(actionEvent -> SystemRun.setText("System Pause"));
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(1, 3));
+        buttonPanel.setLayout(new GridLayout(1, 2));
         buttonPanel.add(startButton);
         buttonPanel.add(pauseButton);
         buttonPanel.add(SystemRun);
         buttonPanel.setPreferredSize(new Dimension(50,30));
         mainPanel.add(buttonPanel, BorderLayout.PAGE_START);
 
-        cpu1Label = new JTextField("CPU 1");
         currentProcess = new JTextField("Executing:");
         timeRemaining = new JTextField("Time Remaining:");
 
-        cpu1Label2 = new JTextField("CPU 2");
         currentProcess2 = new JTextField("Executing:");
         timeRemaining2 = new JTextField("Time Remaining:");
 
@@ -68,9 +66,9 @@ public class SwingView extends JComponent implements PropertyChangeListener
         mainPanel.add(queuePanel, BorderLayout.CENTER);
 
         //Time unit field
-        JLabel timeUnit = new JLabel("1 time unit (ms) = ");
+        JLabel timeUnit = new JLabel("1 time unit = ");
 
-        TimeUnit = new JTextField(" ");
+        TimeUnit = new JTextField("100");
         TimeUnit.setPreferredSize(new Dimension(40, 20));
 
         TimeUnit.addKeyListener(new KeyListener() {
@@ -85,7 +83,7 @@ public class SwingView extends JComponent implements PropertyChangeListener
             // time unit to be processed
             @Override
             public void keyReleased(KeyEvent e) {
-                int timeUnit = 0;
+                int timeUnit = 1;
                 try {
                     timeUnit = Integer.parseInt(TimeUnit.getText());
                 }
@@ -93,6 +91,9 @@ public class SwingView extends JComponent implements PropertyChangeListener
                 {
                     timeUnit = 1;
                 }
+                if (timeUnit <= 0)
+                    timeUnit = 1;
+                Process.instance.timeUnit = timeUnit;
             }
         });
 
@@ -108,13 +109,15 @@ public class SwingView extends JComponent implements PropertyChangeListener
         JPanel cpuPanel2 = new JPanel();
         cpuPanel2.setLayout(new BoxLayout(cpuPanel2, BoxLayout.PAGE_AXIS));
 
-        JPanel adminPanel = new JPanel();
-        adminPanel.setLayout(new GridLayout(2, 1));
+        JPanel processpanel = new JPanel();
+        processpanel.setLayout(new GridLayout(2, 1));
 
         timePanel.add(timeUnit);
         timePanel.add(TimeUnit);
+        timePanel.add(current_throughput);
 
-        adminPanel.add(timePanel);
+        processpanel.add(timePanel);
+        processpanel.setPreferredSize(new Dimension(270, 200));
 
         cpuPanel.add(cpu1Label);
         cpuPanel.add(currentProcess);
@@ -125,12 +128,10 @@ public class SwingView extends JComponent implements PropertyChangeListener
         cpuPanel.add(currentProcess2);
         cpuPanel.add(timeRemaining2);
 
-        adminPanel.add(cpuPanel);
+        processpanel.add(cpuPanel);
 
-        adminPanel.add(cpuPanel2);
-
-        adminPanel.setPreferredSize(new Dimension(270, 200));
-        mainPanel.add(adminPanel, BorderLayout.EAST);
+        processpanel.add(cpuPanel2);
+        mainPanel.add(processpanel, BorderLayout.EAST);
 
         JPanel reportPanel = new JPanel();
 
@@ -138,6 +139,7 @@ public class SwingView extends JComponent implements PropertyChangeListener
         JTable statsTable = new JTable(StatsProcesses);
 
         reportPanel.add(new JScrollPane(statsTable));
+
         reportPanel.setPreferredSize(new Dimension(100,200));
         mainPanel.add(reportPanel, BorderLayout.SOUTH);
 
@@ -145,6 +147,7 @@ public class SwingView extends JComponent implements PropertyChangeListener
         setLayout(new FlowLayout());
 
         ProcessHandler.instance.addPropertyChangeListener(this);
+        Process.instance.addPropertyChangeListener(this);
         parseFile();
     }
 
@@ -183,7 +186,8 @@ public class SwingView extends JComponent implements PropertyChangeListener
                             new java.util.TimerTask() {
                                 @Override
                                 public void run() {
-                                    ProcessHandler.instance.addProcess(new Process(name, length, priority));
+                                    Process.instance.add_arriving_process(new ProcessInformation(name,
+                                            length, priority, arrivalTime));
                                 }
                             },
                             arrivalTime * 1000
@@ -197,18 +201,53 @@ public class SwingView extends JComponent implements PropertyChangeListener
     }
 
     // Where all the GUI updates would be made
-    public void propertyChange(PropertyChangeEvent event)
-    {
-        Queue<Process> processes = (Queue<Process>)event.getNewValue();
-        int rows = ProcessnServiceTime.getRowCount();
-        for (int i = 0; i < rows; i++)
-        {
-            ProcessnServiceTime.removeRow(0);
+    public void propertyChange(PropertyChangeEvent event) {
+        String propertyName = event.getPropertyName();
+        if (propertyName.equals("processes")) {
+            Queue<ProcessInformation> processes = (Queue<ProcessInformation>) event.getNewValue();
+            int rows = ProcessnServiceTime.getRowCount();
+            for (int i = 0; i < rows; i++) {
+                ProcessnServiceTime.removeRow(0);
+            }
+            for (ProcessInformation process : processes) {
+                ProcessnServiceTime.addRow(new String[]{process.process,
+                        Double.toString(process.get_remaining_service_time())});
+            }
+            ProcessnServiceTime.fireTableDataChanged();
+
+        } else if (propertyName.equals("CompletedProcess")) {
+            java.util.List<ProcessInformation> processes = (java.util.List<ProcessInformation>) event.getNewValue();
+            int rows = StatsProcesses.getRowCount();
+            for (int i = 0; i < rows; i++) {
+                StatsProcesses.removeRow(0);
+            }
+            for (ProcessInformation newprocess : processes) {
+                StatsProcesses.addRow(new String[]{
+                        newprocess.process,
+                        Double.toString(newprocess.get_arrival_time()),
+                        Double.toString(newprocess.get_service_time()),
+                        Double.toString(newprocess.get_finish_time()),
+                        String.format("%.3f", newprocess.get_TAT()),
+                        String.format("%.3f", newprocess.get_nTAT())
+                });
+            }
+            StatsProcesses.fireTableDataChanged();
+
+        } else if (propertyName.equals("Throughput")) {
+            double[] value = (double[]) event.getNewValue();
+            // uses current time divided by number of processes left
+            double Throughoutputvalue = (value[1] / value[0]);
+            current_throughput.setText("Throughput: " + String.format("%.3f", Throughoutputvalue));
+
+        } else if (propertyName.equals("cpu_1")) {
+            ProcessInformation runningprocess = (ProcessInformation)event.getNewValue();
+            currentProcess.setText("Executing " + runningprocess.process);
+            timeRemaining.setText("Time Remaining: " + runningprocess.get_remaining_service_time());
+
+        } else if(propertyName.equals("cpu_2")) {
+            ProcessInformation runningprocess = (ProcessInformation)event.getNewValue();
+            currentProcess2.setText("Executing " + runningprocess.process);
+            timeRemaining2.setText("Time Remaining: " + runningprocess.get_remaining_service_time());
         }
-        for (Process process : processes)
-        {
-            ProcessnServiceTime.addRow(new String[] { process.name, Double.toString(process.getDuration()) });
-        }
-        ProcessnServiceTime.fireTableDataChanged();
     }
 }

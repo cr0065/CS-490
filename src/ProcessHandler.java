@@ -2,49 +2,80 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ProcessHandler implements PropertyChangeListener {
     public static ProcessHandler instance = new ProcessHandler();
 
-    private Queue<Process> processes = new LinkedList<>();
-    private List<CPU> CPU = new ArrayList<>();
+    private Queue<ProcessInformation> processes = new LinkedList<>();
+    private List<CPU> CPU = new LinkedList<>();
+    private List<ProcessInformation> complete = new LinkedList<>();
+
+    public Lock Lock = new ReentrantLock();
 
     private PropertyChangeSupport ChangeField = new PropertyChangeSupport(this);
 
     public ProcessHandler()
     {
+        // Starts CPU 1
         CPU.add(new CPU());
         CPU.get(0).start();
-    }
 
-    public Queue<Process> getProcesses()
-    {
-        return processes;
+        // Starts CPU 2
+        CPU.add(new CPU());
+        CPU.get(1).start();
     }
 
     public void setCpuPause(boolean isPaused)
     {
-        CPU.get(0).setPaused(isPaused);
+        Process.instance.isPaused = isPaused;
+        for (CPU cpu : CPU)
+        {
+            cpu.setPaused(isPaused);
+        }
     }
 
-    public void addProcess(Process process)
+    public void addProcess(ProcessInformation process)
     {
         process.addPropertyChangeListener(this);
-        processes.add(process);
-        ChangeField.firePropertyChange("processes", null, processes);
+        Lock.lock();
+        try {
+            processes.add(process);
+            ChangeField.firePropertyChange("processes", null, processes);
+        } finally {
+            Lock.unlock();
+        }
+    }
+
+    public void complete_process(ProcessInformation process){
+        complete.add(process);
+        ChangeField.firePropertyChange("CompletedProcess", null, complete);
+    }
+
+    public List<ProcessInformation> get_completed_process(){
+        return complete;
     }
 
     // gets the process and then removes it for the queue
-    public Process popProcess()
+    public ProcessInformation popProcess()
     {
-        if (processes.size() > 0)
-        {
-            Process removedProcess = processes.remove();
-            removedProcess.removePropertyChangeListener(this);
-            ChangeField.firePropertyChange("processes", null, processes);
-            return removedProcess;
+        ProcessInformation removedProcess = null;
+
+        Lock.lock();
+        try {
+            if (processes.size() > 0)
+            {
+                removedProcess = processes.remove();
+            }
+        } finally {
+            Lock.unlock();
         }
-        return null;
+
+        if (removedProcess != null)
+            ChangeField.firePropertyChange("processes", null, processes);
+
+        return removedProcess;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener)
@@ -52,16 +83,16 @@ public class ProcessHandler implements PropertyChangeListener {
         ChangeField.addPropertyChangeListener(listener);
     }
 
-    // Changes data with given params
+    // Changes to the CPU area of the GUI
     public void propertyChange(PropertyChangeEvent event)
     {
-        Process processfromfile = (Process)event.getNewValue();
-        for (Process process : processes)
+        ProcessInformation processfromfile = (ProcessInformation)event.getNewValue();
+        for(int cpus_left = 0; cpus_left < CPU.size(); cpus_left++)
         {
-            if (process.name == processfromfile.name)
-                ChangeField.firePropertyChange("cpu1Process", null, processfromfile);
+            ProcessInformation cpuProcess = CPU.get(cpus_left).get_current_process();
+            if (cpuProcess != null && cpuProcess.process == processfromfile.process);
+                ChangeField.firePropertyChange("cpu_" + (cpus_left + 1), null, processfromfile);
 
         }
-        ChangeField.firePropertyChange("processes", null, processes);
     }
 }
