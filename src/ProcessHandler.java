@@ -90,9 +90,9 @@ public class ProcessHandler implements PropertyChangeListener {
         for(int cpus_left = 0; cpus_left < CPU.size(); cpus_left++)
         {
             ProcessInformation cpuProcess = CPU.get(cpus_left).get_current_process();
-            if (cpuProcess != null && cpuProcess.process == processfromfile.process);
+            if (cpuProcess != null && cpuProcess.process == processfromfile.process) {
                 ChangeField.firePropertyChange("cpu_" + (cpus_left + 1), null, processfromfile);
-
+            }
         }
     }
 }

@@ -237,7 +237,7 @@ public class SwingView extends JComponent implements PropertyChangeListener {
             double[] value = (double[]) event.getNewValue();
             // uses current time divided by number of processes left
             double Throughoutputvalue = (value[1] / value[0]);
-            current_throughput.setText("Throughput: " + String.format("%.3f", Throughoutputvalue));
+            current_throughput.setText("Throughput: \n" + String.format("%.3f", Throughoutputvalue));
 
         } else if (propertyName.equals("cpu_1")) {
             ProcessInformation runningprocess = (ProcessInformation)event.getNewValue();
