@@ -80,7 +80,7 @@ public class SwingView extends JComponent implements PropertyChangeListener {
             public void keyPressed(KeyEvent e) {
             }
 
-            // time unit to be processed
+            // Is the listener for the timeunit field
             @Override
             public void keyReleased(KeyEvent e) {
                 int timeUnit = 1;

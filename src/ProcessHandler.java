@@ -39,9 +39,11 @@ public class ProcessHandler implements PropertyChangeListener {
     public void addProcess(ProcessInformation process)
     {
         process.addPropertyChangeListener(this);
+        // Lock allows the process to run before anything else is ran
         Lock.lock();
         try {
             processes.add(process);
+            // named to keep track of the property
             ChangeField.firePropertyChange("processes", null, processes);
         } finally {
             Lock.unlock();
@@ -50,6 +52,7 @@ public class ProcessHandler implements PropertyChangeListener {
 
     public void complete_process(ProcessInformation process){
         complete.add(process);
+        // named to keep track of the property
         ChangeField.firePropertyChange("CompletedProcess", null, complete);
     }
 
@@ -60,22 +63,23 @@ public class ProcessHandler implements PropertyChangeListener {
     // gets the process and then removes it for the queue
     public ProcessInformation popProcess()
     {
-        ProcessInformation removedProcess = null;
-
+        // Removed processes to store in the bottom table
+        ProcessInformation removed = null;
+        // Does the locked thing again
         Lock.lock();
         try {
             if (processes.size() > 0)
             {
-                removedProcess = processes.remove();
+                removed = processes.remove();
             }
         } finally {
             Lock.unlock();
         }
 
-        if (removedProcess != null)
+        if (removed != null)
             ChangeField.firePropertyChange("processes", null, processes);
 
-        return removedProcess;
+        return removed;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener)
@@ -86,12 +90,14 @@ public class ProcessHandler implements PropertyChangeListener {
     // Changes to the CPU area of the GUI
     public void propertyChange(PropertyChangeEvent event)
     {
+        // Gets the Process and uses the information to update in the GUI
         ProcessInformation processfromfile = (ProcessInformation)event.getNewValue();
-        for(int cpus_left = 0; cpus_left < CPU.size(); cpus_left++)
+        for(int cpu_process_count = 0; cpu_process_count < CPU.size(); cpu_process_count++)
         {
-            ProcessInformation cpuProcess = CPU.get(cpus_left).get_current_process();
-            if (cpuProcess != null && cpuProcess.process == processfromfile.process) {
-                ChangeField.firePropertyChange("cpu_" + (cpus_left + 1), null, processfromfile);
+            ProcessInformation cpu_process = CPU.get(cpu_process_count).get_current_process();
+            if (cpu_process != null && cpu_process.process == processfromfile.process) {
+                // Property Name to update
+                ChangeField.firePropertyChange("cpu_" + (cpu_process_count + 1), null, processfromfile);
             }
         }
     }

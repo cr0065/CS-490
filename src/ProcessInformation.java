@@ -23,6 +23,7 @@ public class ProcessInformation {
         this.arrival_time = arrival_time;
     }
 
+    // Getters and setters for all the necessary information
     public double get_service_time()
     {
         return service_time;
