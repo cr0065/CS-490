@@ -1,4 +1,7 @@
+import javafx.scene.layout.Background;
+
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -12,6 +15,8 @@ import java.util.Scanner;
 
 // Creates the Main GUI display for the program
 public class SwingView extends JComponent implements PropertyChangeListener {
+    Font myFont = new Font(Font.SERIF, Font.PLAIN, 18);
+    Font executingfont = new Font(Font.SERIF, Font.BOLD, 12);
     DefaultTableModel ProcessnServiceTime;
     JLabel cpu1Label = new JLabel("CPU #1");
     JTextField currentProcess;
@@ -37,10 +42,15 @@ public class SwingView extends JComponent implements PropertyChangeListener {
         JButton startButton = new JButton("Start System");
         JButton pauseButton = new JButton("Pause System");
         JLabel SystemRun = new JLabel(" ");
+        SystemRun.setFont(myFont);
         startButton.addActionListener(actionEvent -> ProcessHandler.instance.setCpuPause(false));
         startButton.addActionListener(actionEvent -> SystemRun.setText("System Running"));
+        startButton.setFont(myFont);
+        startButton.setBorder(new LineBorder(Color.BLACK));
         pauseButton.addActionListener(actionEvent -> ProcessHandler.instance.setCpuPause(true));
         pauseButton.addActionListener(actionEvent -> SystemRun.setText("System Pause"));
+        pauseButton.setFont(myFont);
+        pauseButton.setBorder(new LineBorder(Color.BLACK));
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(1, 2));
@@ -52,9 +62,17 @@ public class SwingView extends JComponent implements PropertyChangeListener {
 
         currentProcess = new JTextField("Executing:");
         timeRemaining = new JTextField("Time Remaining:");
+        currentProcess.setFont(executingfont);
+        currentProcess.setBackground(Color.orange);
+        timeRemaining.setFont(executingfont);
+        timeRemaining.setBackground(Color.orange);
 
         currentProcess2 = new JTextField("Executing:");
+        currentProcess2.setFont(executingfont);
+        currentProcess2.setBackground(Color.orange);
         timeRemaining2 = new JTextField("Time Remaining:");
+        timeRemaining2.setFont(executingfont);
+        timeRemaining2.setBackground(Color.orange);
 
         //Process Queue
         ProcessnServiceTime = new DefaultTableModel(colNames, 0);
@@ -103,6 +121,7 @@ public class SwingView extends JComponent implements PropertyChangeListener {
 
         // CPU PANEL 1
         JPanel cpuPanel = new JPanel();
+        cpuPanel.setPreferredSize(new Dimension(200,200));
         cpuPanel.setLayout(new BoxLayout(cpuPanel, BoxLayout.PAGE_AXIS));
 
         // CPU PANEL 2
@@ -139,8 +158,7 @@ public class SwingView extends JComponent implements PropertyChangeListener {
         JTable statsTable = new JTable(StatsProcesses);
 
         reportPanel.add(new JScrollPane(statsTable));
-
-        reportPanel.setPreferredSize(new Dimension(100,200));
+        reportPanel.setPreferredSize(new Dimension(400,200));
         mainPanel.add(reportPanel, BorderLayout.SOUTH);
 
         add(mainPanel);

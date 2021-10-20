@@ -1,3 +1,10 @@
+/*
+    Team 10
+    Group Members: Samuel Strong
+                   Edson Jaramillo
+                   Marshall Wright
+                   Cameron Ramos
+ */
 import javax.swing.*;
 import java.awt.*;
 
