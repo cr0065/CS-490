@@ -1,3 +1,9 @@
+/* CS 490 Phase 2
+  ProcessHandler.java
+  10-20-2021
+  Cameron Ramos, Samuel Strong, Marshall Wright, Edson Jaramillo
+  ProcessHandler Creates the CPU and then passes the CPU the next process in the queue
+------------------------------------------------------------ */
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

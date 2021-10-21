@@ -1,3 +1,9 @@
+/* CS 490 Phase 2
+  ProcessInformation.java
+  10-20-2021
+  Cameron Ramos, Samuel Strong, Marshall Wright, Edson Jaramillo
+  ProcessInformation is the object that contains each of the variables for each individual process
+------------------------------------------------------------ */
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 

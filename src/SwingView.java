@@ -1,4 +1,9 @@
-//import javafx.scene.layout.Background;
+/* CS 490 Phase 2
+  SwingView.java
+  10-20-2021
+  Cameron Ramos, Samuel Strong, Marshall Wright, Edson Jaramillo
+  SwingView is the main container for the GUI and does all the GUI interaction.
+------------------------------------------------------------ */
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

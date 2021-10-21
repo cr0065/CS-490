@@ -1,3 +1,9 @@
+/* CS 490 Phase 2
+  CPU.java
+  10-20-2021
+  Cameron Ramos, Samuel Strong, Marshall Wright, Edson Jaramillo
+  CPU is an object that simulates a CPU by running a delayed process in a thread.
+------------------------------------------------------------ */
 public class CPU implements Runnable
 {
     private Thread thread;
