@@ -15,6 +15,7 @@ public class Process implements Runnable {
     public boolean isPaused = true;
 
     private Map<ProcessInformation, Double> arrivingProcesses = new Hashtable<>();
+    private List<ProcessInformation> processes = new ArrayList<>();
 
     public double currentTime = 0;
     public int timeUnit = 100;

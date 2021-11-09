@@ -23,18 +23,21 @@ public class SwingView extends JComponent implements PropertyChangeListener {
     Font myFont = new Font(Font.SERIF, Font.PLAIN, 18);
     Font executingfont = new Font(Font.SERIF, Font.BOLD, 12);
     DefaultTableModel ProcessnServiceTime;
-    JLabel cpu1Label = new JLabel("CPU #1");
+    DefaultTableModel ProcessnServiceTime2;
+    JLabel jLabel4 = new JLabel("Waiting on Process Queue");
+    JLabel cpu1Label = new JLabel("CPU 1(HRRN)");
     JTextField currentProcess;
     JTextField timeRemaining;
 
-    JLabel cpu1Label2 = new JLabel("CPU #2");
+    JLabel cpu1Label2 = new JLabel("CPU (RR)");
     JTextField currentProcess2;
     JTextField timeRemaining2;
 
     JTextField TimeUnit;
-    JLabel current_throughput = new JLabel("Throughput:    ");
+    JTextField RRTime;
     String[] TableHeading = {"Process ","Arrival Time","Service Time","Finish Time","TAT","nTAT"};
     DefaultTableModel StatsProcesses;
+    DefaultTableModel StatsProcesses2;
 
     final String[] colNames = {"Process Name", "Service Time"};
 
@@ -56,17 +59,26 @@ public class SwingView extends JComponent implements PropertyChangeListener {
         pauseButton.addActionListener(actionEvent -> SystemRun.setText("System Pause"));
         pauseButton.setFont(myFont);
         pauseButton.setBorder(new LineBorder(Color.BLACK));
+        //Time unit field
+        JLabel timeUnit = new JLabel("1 time unit = ");
+
+        TimeUnit = new JTextField("100");
+        TimeUnit.setPreferredSize(new Dimension(10, 20));
 
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(1, 2));
+        buttonPanel.setLayout(new GridLayout(1, 4));
         buttonPanel.add(startButton);
         buttonPanel.add(pauseButton);
         buttonPanel.add(SystemRun);
-        buttonPanel.setPreferredSize(new Dimension(50,30));
+        buttonPanel.add(timeUnit);
+        buttonPanel.add(TimeUnit);
+
+
+        buttonPanel.setPreferredSize(new Dimension(100,30));
         mainPanel.add(buttonPanel, BorderLayout.PAGE_START);
 
-        currentProcess = new JTextField("Executing:");
-        timeRemaining = new JTextField("Time Remaining:");
+        currentProcess = new JTextField("Executing: \n");
+        timeRemaining = new JTextField("Time Remaining: \n");
         currentProcess.setFont(executingfont);
         currentProcess.setBackground(Color.orange);
         timeRemaining.setFont(executingfont);
@@ -81,18 +93,51 @@ public class SwingView extends JComponent implements PropertyChangeListener {
 
         //Process Queue
         ProcessnServiceTime = new DefaultTableModel(colNames, 0);
-        JTable table = new JTable(ProcessnServiceTime);
+        JScrollPane table = new JScrollPane(new JTable(ProcessnServiceTime));
+        table.setPreferredSize(new Dimension(300, 300));
+
+        ProcessnServiceTime2 = new DefaultTableModel(colNames, 0);
+        JScrollPane table2 = new JScrollPane(new JTable(ProcessnServiceTime2));
+        table2.setPreferredSize(new Dimension(300, 300));
 
         JPanel queuePanel = new JPanel();
+        queuePanel.setLayout(new GridLayout(1,4));
 
-        queuePanel.add(new JScrollPane(table));
+        queuePanel.add(table);
+
+        JPanel cpuPanel = new JPanel();
+        cpuPanel.setPreferredSize(new Dimension(200,200));
+        cpuPanel.setLayout(new GridLayout(0,1));
+
+        cpuPanel.add(cpu1Label);
+        cpuPanel.add(currentProcess);
+        cpuPanel.add(timeRemaining);
+
+        queuePanel.add(cpuPanel);
+
+        queuePanel.add(table2);
+
+        JPanel cpuPanel2 = new JPanel();
+        cpuPanel2.setPreferredSize(new Dimension(200,200));
+        cpuPanel2.setLayout(new GridLayout(0,1));
+
+        JLabel RR = new JLabel("Round Robin Time Slice Length");
+
+        cpuPanel2.add(cpu1Label2);
+        cpuPanel2.add(currentProcess2);
+        cpuPanel2.add(timeRemaining2);
+
+        queuePanel.add(cpuPanel2);
+
         mainPanel.add(queuePanel, BorderLayout.CENTER);
+        JPanel RRPanel = new JPanel();
+        RRTime = new JTextField("100");
+        RRTime.setPreferredSize(new Dimension(50, 20));
 
-        //Time unit field
-        JLabel timeUnit = new JLabel("1 time unit = ");
+        RRPanel.add(RR);
+        RRPanel.add(RRTime);
 
-        TimeUnit = new JTextField("100");
-        TimeUnit.setPreferredSize(new Dimension(40, 20));
+        mainPanel.add(RRPanel, BorderLayout.EAST);
 
         TimeUnit.addKeyListener(new KeyListener() {
             @Override
@@ -120,50 +165,27 @@ public class SwingView extends JComponent implements PropertyChangeListener {
             }
         });
 
-        // time unit the little ms thing.
-        JPanel timePanel = new JPanel();
-        timePanel.setLayout(new FlowLayout());
-
-        // CPU PANEL 1
-        JPanel cpuPanel = new JPanel();
-        cpuPanel.setPreferredSize(new Dimension(200,200));
-        cpuPanel.setLayout(new BoxLayout(cpuPanel, BoxLayout.PAGE_AXIS));
-
-        // CPU PANEL 2
-        JPanel cpuPanel2 = new JPanel();
-        cpuPanel2.setLayout(new BoxLayout(cpuPanel2, BoxLayout.PAGE_AXIS));
-
-        JPanel processpanel = new JPanel();
-        processpanel.setLayout(new GridLayout(2, 1));
-
-        timePanel.add(timeUnit);
-        timePanel.add(TimeUnit);
-        timePanel.add(current_throughput);
-
-        processpanel.add(timePanel);
-        processpanel.setPreferredSize(new Dimension(270, 200));
-
-        cpuPanel.add(cpu1Label);
-        cpuPanel.add(currentProcess);
-        cpuPanel.add(timeRemaining);
-
-
-        cpuPanel.add(cpu1Label2);
-        cpuPanel.add(currentProcess2);
-        cpuPanel.add(timeRemaining2);
-
-        processpanel.add(cpuPanel);
-
-        processpanel.add(cpuPanel2);
-        mainPanel.add(processpanel, BorderLayout.EAST);
-
         JPanel reportPanel = new JPanel();
+        reportPanel.setPreferredSize(new Dimension(200,250));
+        reportPanel.setLayout(new GridLayout(2,2));
 
         StatsProcesses = new DefaultTableModel(TableHeading, 0);
-        JTable statsTable = new JTable(StatsProcesses);
+        JScrollPane StatsTable = new JScrollPane(new JTable(StatsProcesses));
+        StatsTable.setPreferredSize(new Dimension(100, 250));
 
-        reportPanel.add(new JScrollPane(statsTable));
-        reportPanel.setPreferredSize(new Dimension(400,200));
+        StatsProcesses2 = new DefaultTableModel(TableHeading, 0);
+        JScrollPane StatsTable2 = new JScrollPane(new JTable(StatsProcesses2));
+        StatsTable2.setPreferredSize(new Dimension(100, 250));
+
+        reportPanel.add(StatsTable);
+        reportPanel.add(StatsTable2);
+
+        JLabel Averagentat = new JLabel("Current average nTAT: ");
+        JLabel Averagentat2 = new JLabel("Current average nTAT: ");
+
+        reportPanel.add(Averagentat);
+        reportPanel.add(Averagentat2);
+
         mainPanel.add(reportPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
@@ -255,12 +277,6 @@ public class SwingView extends JComponent implements PropertyChangeListener {
                 });
             }
             StatsProcesses.fireTableDataChanged();
-
-        } else if (propertyName.equals("Throughput")) {
-            double[] value = (double[]) event.getNewValue();
-            // uses current time divided by number of processes left
-            double Throughoutputvalue = (value[1] / value[0]);
-            current_throughput.setText("Throughput: \n" + String.format("%.3f", Throughoutputvalue));
 
         } else if (propertyName.equals("cpu_1")) {
             ProcessInformation runningprocess = (ProcessInformation)event.getNewValue();
