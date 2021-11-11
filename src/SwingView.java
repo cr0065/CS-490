@@ -21,6 +21,7 @@ import java.util.Scanner;
 
 // Creates the Main GUI display for the program
 public class SwingView extends JComponent implements PropertyChangeListener {
+    //Contains all the variables that is needed for the GUI implementations
     Font myFont = new Font(Font.SERIF, Font.PLAIN, 18);
     Font executingfont = new Font(Font.SERIF, Font.BOLD, 12);
     DefaultTableModel ProcessnServiceTime;
@@ -45,7 +46,6 @@ public class SwingView extends JComponent implements PropertyChangeListener {
 
     final String[] colNames = {"Process Name", "Service Time"};
 
-    private static DecimalFormat df = new DecimalFormat("0.00");
     // Contains all the button declarations and calls to the buttons
     public SwingView()
     {
@@ -218,10 +218,11 @@ public class SwingView extends JComponent implements PropertyChangeListener {
                 }
                 catch (NumberFormatException ex)
                 {
-                    RRTimeUnit = 1000;
+                    //Default Value for RRTime
+                    RRTimeUnit = 8;
                 }
                 if (RRTimeUnit <= 0)
-                    RRTimeUnit = 1000;
+                    RRTimeUnit = 8;
                 Process.instance.timeUnit = RRTimeUnit;
             }
         });
@@ -304,9 +305,9 @@ public class SwingView extends JComponent implements PropertyChangeListener {
             }
             ProcessnServiceTime2.fireTableDataChanged();
         }
-        } else if (propertyName.equals("CompletedProcess")) {
+        } else if (propertyName.startsWith("CompletedProcess")) {
             java.util.List<ProcessInformation> processes = (java.util.List<ProcessInformation>) event.getNewValue();
-            if (Integer.parseInt(propertyName.substring(17, 18)) == 0) {
+            if (Integer.parseInt(propertyName.substring(16, 17)) == 0) {
                 int rows = StatsProcesses.getRowCount();
                 for (int i = 0; i < rows; i++) {
                     StatsProcesses.removeRow(0);
@@ -317,8 +318,8 @@ public class SwingView extends JComponent implements PropertyChangeListener {
                             Double.toString(newprocess.get_arrival_time()),
                             Double.toString(newprocess.get_service_time()),
                             Double.toString(newprocess.get_finish_time()),
-                            String.format("%.3f", newprocess.get_TAT()),
-                            String.format("%.3f", newprocess.get_nTAT())
+                            String.format("%.2f", newprocess.get_TAT()),
+                            String.format("%.2f", newprocess.get_nTAT())
                     });
                 }
                 StatsProcesses.fireTableDataChanged();
@@ -342,13 +343,12 @@ public class SwingView extends JComponent implements PropertyChangeListener {
         }
         else if (propertyName.startsWith("nTatAverage")) {
             double nTAT = (double)event.getNewValue();
-            if (Integer.parseInt(propertyName.substring(11, 12)) == 0)
-            {
-                Averagentat.setText("CPU 1 nTAT: " + df.format(nTAT));
+            if (Integer.parseInt(propertyName.substring(11, 12)) == 0) {
+                Averagentat.setText("CPU 1 nTAT: " + String.format("%.2f", nTAT));
             }
             else
             {
-                Averagentat2.setText("CPU 2 nTAT: " + df.format(nTAT));
+                Averagentat2.setText("CPU 2 nTAT: " + String.format("%.2f", nTAT));
             }
         }
         else if (propertyName.equals("cpu_1")) {
