@@ -29,6 +29,16 @@ public class ProcessInformation {
         this.arrival_time = arrival_time;
     }
 
+    // constructor for new values
+    public ProcessInformation(ProcessInformation info) {
+        this.process = info.process;
+        this.service_time = info.service_time;
+        this.remaining_service_time = info.remaining_service_time;
+        this.priority = info.priority;
+        this.arrival_time = info.arrival_time;
+        this.finish_Time = info.finish_Time;
+    }
+
     // Getters and setters for all the necessary information
     public double get_service_time()
     {

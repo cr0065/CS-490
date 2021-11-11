@@ -15,6 +15,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.DecimalFormat;
 import java.util.Queue;
 import java.util.Scanner;
 
@@ -33,6 +34,9 @@ public class SwingView extends JComponent implements PropertyChangeListener {
     JTextField currentProcess2;
     JTextField timeRemaining2;
 
+    JLabel Averagentat;
+    JLabel Averagentat2;
+
     JTextField TimeUnit;
     JTextField RRTime;
     String[] TableHeading = {"Process ","Arrival Time","Service Time","Finish Time","TAT","nTAT"};
@@ -41,6 +45,7 @@ public class SwingView extends JComponent implements PropertyChangeListener {
 
     final String[] colNames = {"Process Name", "Service Time"};
 
+    private static DecimalFormat df = new DecimalFormat("0.00");
     // Contains all the button declarations and calls to the buttons
     public SwingView()
     {
@@ -51,11 +56,11 @@ public class SwingView extends JComponent implements PropertyChangeListener {
         JButton pauseButton = new JButton("Pause System");
         JLabel SystemRun = new JLabel(" ");
         SystemRun.setFont(myFont);
-        startButton.addActionListener(actionEvent -> ProcessHandler.instance.setCpuPause(false));
+        startButton.addActionListener(actionEvent -> Process.instance.Pause(false));
         startButton.addActionListener(actionEvent -> SystemRun.setText("System Running"));
         startButton.setFont(myFont);
         startButton.setBorder(new LineBorder(Color.BLACK));
-        pauseButton.addActionListener(actionEvent -> ProcessHandler.instance.setCpuPause(true));
+        pauseButton.addActionListener(actionEvent -> Process.instance.Pause(true));
         pauseButton.addActionListener(actionEvent -> SystemRun.setText("System Pause"));
         pauseButton.setFont(myFont);
         pauseButton.setBorder(new LineBorder(Color.BLACK));
@@ -131,13 +136,43 @@ public class SwingView extends JComponent implements PropertyChangeListener {
 
         mainPanel.add(queuePanel, BorderLayout.CENTER);
         JPanel RRPanel = new JPanel();
-        RRTime = new JTextField("100");
+        RRTime = new JTextField("10");
         RRTime.setPreferredSize(new Dimension(50, 20));
 
         RRPanel.add(RR);
         RRPanel.add(RRTime);
 
         mainPanel.add(RRPanel, BorderLayout.EAST);
+
+        JPanel reportPanel = new JPanel();
+        reportPanel.setPreferredSize(new Dimension(200,250));
+        reportPanel.setLayout(new GridLayout(2,2));
+
+        StatsProcesses = new DefaultTableModel(TableHeading, 0);
+        JScrollPane StatsTable = new JScrollPane(new JTable(StatsProcesses));
+        StatsTable.setPreferredSize(new Dimension(100, 250));
+
+        StatsProcesses2 = new DefaultTableModel(TableHeading, 0);
+        JScrollPane StatsTable2 = new JScrollPane(new JTable(StatsProcesses2));
+        StatsTable2.setPreferredSize(new Dimension(100, 250));
+
+        reportPanel.add(StatsTable);
+        reportPanel.add(StatsTable2);
+
+        Averagentat = new JLabel("Current average nTAT: ");
+        Averagentat2 = new JLabel("Current average nTAT: ");
+
+        reportPanel.add(Averagentat);
+        reportPanel.add(Averagentat2);
+
+        mainPanel.add(reportPanel, BorderLayout.SOUTH);
+
+        add(mainPanel);
+        setLayout(new FlowLayout());
+
+        Process.instance.addPropertyChangeListener(this);
+        Process.instance.addPropertyChangeListener(this);
+        parseFile();
 
         TimeUnit.addKeyListener(new KeyListener() {
             @Override
@@ -165,35 +200,31 @@ public class SwingView extends JComponent implements PropertyChangeListener {
             }
         });
 
-        JPanel reportPanel = new JPanel();
-        reportPanel.setPreferredSize(new Dimension(200,250));
-        reportPanel.setLayout(new GridLayout(2,2));
+        RRTime.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
 
-        StatsProcesses = new DefaultTableModel(TableHeading, 0);
-        JScrollPane StatsTable = new JScrollPane(new JTable(StatsProcesses));
-        StatsTable.setPreferredSize(new Dimension(100, 250));
+            @Override
+            public void keyPressed(KeyEvent e) {
+            }
 
-        StatsProcesses2 = new DefaultTableModel(TableHeading, 0);
-        JScrollPane StatsTable2 = new JScrollPane(new JTable(StatsProcesses2));
-        StatsTable2.setPreferredSize(new Dimension(100, 250));
-
-        reportPanel.add(StatsTable);
-        reportPanel.add(StatsTable2);
-
-        JLabel Averagentat = new JLabel("Current average nTAT: ");
-        JLabel Averagentat2 = new JLabel("Current average nTAT: ");
-
-        reportPanel.add(Averagentat);
-        reportPanel.add(Averagentat2);
-
-        mainPanel.add(reportPanel, BorderLayout.SOUTH);
-
-        add(mainPanel);
-        setLayout(new FlowLayout());
-
-        ProcessHandler.instance.addPropertyChangeListener(this);
-        Process.instance.addPropertyChangeListener(this);
-        parseFile();
+            // Is the listener for the timeunit field
+            @Override
+            public void keyReleased(KeyEvent e) {
+                int RRTimeUnit = 1;
+                try {
+                    RRTimeUnit = Integer.parseInt(RRTime.getText());
+                }
+                catch (NumberFormatException ex)
+                {
+                    RRTimeUnit = 1000;
+                }
+                if (RRTimeUnit <= 0)
+                    RRTimeUnit = 1000;
+                Process.instance.timeUnit = RRTimeUnit;
+            }
+        });
     }
 
     // Parses the file that is chosen
@@ -248,37 +279,79 @@ public class SwingView extends JComponent implements PropertyChangeListener {
     // Where all the GUI updates would be made
     public void propertyChange(PropertyChangeEvent event) {
         String propertyName = event.getPropertyName();
-        if (propertyName.equals("processes")) {
-            Queue<ProcessInformation> processes = (Queue<ProcessInformation>) event.getNewValue();
+        if (propertyName.startsWith("processes")) {
+            Queue<ProcessInformation> processes = (Queue<ProcessInformation>)event.getNewValue();
+        if (Integer.parseInt(propertyName.substring(9, 10)) == 0) {
             int rows = ProcessnServiceTime.getRowCount();
             for (int i = 0; i < rows; i++) {
                 ProcessnServiceTime.removeRow(0);
             }
             for (ProcessInformation process : processes) {
-                ProcessnServiceTime.addRow(new String[]{process.process,
+                ProcessnServiceTime.addRow(new String[]{
+                        process.process,
                         Double.toString(process.get_remaining_service_time())});
             }
             ProcessnServiceTime.fireTableDataChanged();
-
+        } else {
+            int rows = ProcessnServiceTime2.getRowCount();
+            for (int i = 0; i < rows; i++) {
+                ProcessnServiceTime2.removeRow(0);
+            }
+            for (ProcessInformation process : processes) {
+                ProcessnServiceTime2.addRow(new String[]{
+                        process.process,
+                        Double.toString(process.get_remaining_service_time())});
+            }
+            ProcessnServiceTime2.fireTableDataChanged();
+        }
         } else if (propertyName.equals("CompletedProcess")) {
             java.util.List<ProcessInformation> processes = (java.util.List<ProcessInformation>) event.getNewValue();
-            int rows = StatsProcesses.getRowCount();
-            for (int i = 0; i < rows; i++) {
-                StatsProcesses.removeRow(0);
+            if (Integer.parseInt(propertyName.substring(17, 18)) == 0) {
+                int rows = StatsProcesses.getRowCount();
+                for (int i = 0; i < rows; i++) {
+                    StatsProcesses.removeRow(0);
+                }
+                for (ProcessInformation newprocess : processes) {
+                    StatsProcesses.addRow(new String[]{
+                            newprocess.process,
+                            Double.toString(newprocess.get_arrival_time()),
+                            Double.toString(newprocess.get_service_time()),
+                            Double.toString(newprocess.get_finish_time()),
+                            String.format("%.3f", newprocess.get_TAT()),
+                            String.format("%.3f", newprocess.get_nTAT())
+                    });
+                }
+                StatsProcesses.fireTableDataChanged();
+            } else {
+                int rows = StatsProcesses2.getRowCount();
+                for (int i = 0; i < rows; i++) {
+                    StatsProcesses2.removeRow(0);
+                }
+                for (ProcessInformation newprocess : processes) {
+                    StatsProcesses2.addRow(new String[]{
+                            newprocess.process,
+                            Double.toString(newprocess.get_arrival_time()),
+                            Double.toString(newprocess.get_service_time()),
+                            Double.toString(newprocess.get_finish_time()),
+                            String.format("%.3f", newprocess.get_TAT()),
+                            String.format("%.3f", newprocess.get_nTAT())
+                    });
+                }
+                StatsProcesses2.fireTableDataChanged();
             }
-            for (ProcessInformation newprocess : processes) {
-                StatsProcesses.addRow(new String[]{
-                        newprocess.process,
-                        Double.toString(newprocess.get_arrival_time()),
-                        Double.toString(newprocess.get_service_time()),
-                        Double.toString(newprocess.get_finish_time()),
-                        String.format("%.3f", newprocess.get_TAT()),
-                        String.format("%.3f", newprocess.get_nTAT())
-                });
+        }
+        else if (propertyName.startsWith("nTatAverage")) {
+            double nTAT = (double)event.getNewValue();
+            if (Integer.parseInt(propertyName.substring(11, 12)) == 0)
+            {
+                Averagentat.setText("CPU 1 nTAT: " + df.format(nTAT));
             }
-            StatsProcesses.fireTableDataChanged();
-
-        } else if (propertyName.equals("cpu_1")) {
+            else
+            {
+                Averagentat2.setText("CPU 2 nTAT: " + df.format(nTAT));
+            }
+        }
+        else if (propertyName.equals("cpu_1")) {
             ProcessInformation runningprocess = (ProcessInformation)event.getNewValue();
             currentProcess.setText("Executing " + runningprocess.process);
             timeRemaining.setText("Time Remaining: " + runningprocess.get_remaining_service_time());

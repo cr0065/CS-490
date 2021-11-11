@@ -9,6 +9,7 @@ public class CPU implements Runnable
     private Thread thread;
     private ProcessInformation currentProcess;
     private boolean isPaused = true;
+    public ProcessHandler processHandler;
 
     // Used to pause the program
     public void setPaused(boolean isPaused)
@@ -21,12 +22,16 @@ public class CPU implements Runnable
         return currentProcess;
     }
 
+    public CPU(ProcessHandler processHandler){
+        this.processHandler = processHandler;
+    }
+
     // Gets the process and runs it focused on time calculation
     public void run()
     {
         while(true) {
             if (!isPaused) {
-                currentProcess = ProcessHandler.instance.popProcess();
+                currentProcess = processHandler.popProcess();
             }
 
             if (currentProcess != null) {
@@ -43,11 +48,17 @@ public class CPU implements Runnable
                                 - (50f / Process.instance.timeUnit));
                         if (currentProcess.get_remaining_service_time() <= 0) {
                             currentProcess.finish_Time = Process.instance.currentTime;
-                            ProcessHandler.instance.complete_process(currentProcess);
-                            currentProcess = ProcessHandler.instance.popProcess();
+                            processHandler.complete_process(currentProcess);
+                            currentProcess = processHandler.popProcess();
                             if (currentProcess == null) {
                                 break;
                             }
+                        }
+                        if (processHandler.DoOver()) {
+                            processHandler.addProcess(currentProcess);
+                            currentProcess = processHandler.popProcess();
+                            if (currentProcess == null)
+                                break;
                         }
                     }
                     else

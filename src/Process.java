@@ -5,17 +5,18 @@
   Process is the object that starts the thread and passes process info to the GUI
 ------------------------------------------------------------ */
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 
-public class Process implements Runnable {
+public class Process implements Runnable, PropertyChangeListener {
     public static Process instance = new Process();
     private Thread thread;
     public boolean isPaused = true;
 
     private Map<ProcessInformation, Double> arrivingProcesses = new Hashtable<>();
-    private List<ProcessInformation> processes = new ArrayList<>();
+    private List<CPU> processes = new ArrayList<>();
 
     public double currentTime = 0;
     public int timeUnit = 100;
@@ -24,7 +25,16 @@ public class Process implements Runnable {
 
     public Process()
     {
+        processes.add(new CPU(new HRRN()));
+        processes.get(0).processHandler.addPropertyChangeListener(this);
+        processes.get(0).start();
+
+        processes.add(new CPU(new RR()));
+        processes.get(1).processHandler.addPropertyChangeListener(this);
+        processes.get(1).start();
+
         start();
+
     }
     // Gets the information from process information to use for the throughput
     public void add_arriving_process(ProcessInformation Process) {
@@ -39,14 +49,18 @@ public class Process implements Runnable {
     // The run that determines the Throughout
     @Override
     public void run() {
-        while(true) {
+        while (true) {
             if (!isPaused) {
                 List<ProcessInformation> ToRemove = new ArrayList<>();
                 for (Map.Entry<ProcessInformation, Double> entry : arrivingProcesses.entrySet()) {
                     // 50f is for accuracy from what google said
                     entry.setValue(entry.getValue() - (50f / timeUnit));
                     if (entry.getValue() <= 0) {
-                        ProcessHandler.instance.addProcess(entry.getKey());
+                        for (CPU process : processes) {
+                            ProcessInformation info = new ProcessInformation(entry.getKey());
+                            info.addPropertyChangeListener(this);
+                            process.processHandler.addProcess(info);
+                        }
                         ToRemove.add(entry.getKey());
                     }
                 }
@@ -54,17 +68,32 @@ public class Process implements Runnable {
                     arrivingProcesses.remove(process);
                 }
                 currentTime += 50f / timeUnit;
-                // returns the information to the GUI using a double array that stores the current time and amount of
-                // completed processes
-                ChangeField.firePropertyChange("Throughput", null, new double[]{currentTime,
-                        ProcessHandler.instance.get_completed_process().size()});
-            }
+                for (int i = 0; i < processes.size(); i++) {
+                    double Current_Average_nTat = 0;
 
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                    for (ProcessInformation info : processes.get(i).processHandler.get_completed_process()) {
+                        Current_Average_nTat += info.get_nTAT();
+                    }
+                    ChangeField.firePropertyChange("nTatAverage" + i,
+                            null, Current_Average_nTat
+                                    / processes.get(i).processHandler.get_completed_process().size());
+                    }
+                }
+
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+        }
+
+    public void Pause(boolean isPaused)
+    {
+        Process.instance.isPaused = isPaused;
+        for (CPU process : processes)
+        {
+            process.setPaused(isPaused);
         }
     }
 
@@ -74,6 +103,38 @@ public class Process implements Runnable {
         {
             thread = new Thread(this);
             thread.start();
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        // Gets the Process and uses the information to update in the GUI
+        if (evt.getSource() instanceof ProcessInformation) {
+            ProcessInformation processfromfile = (ProcessInformation)evt.getNewValue();
+
+            for (int cpu_process_count  = 0; cpu_process_count < processes.size(); cpu_process_count++) {
+                ProcessInformation cpuProcess = processes.get(cpu_process_count ).get_current_process();
+                if (cpuProcess != null && cpuProcess.process == processfromfile.process) {
+                    ChangeField.firePropertyChange("cpu_" + (cpu_process_count  + 1),
+                            null, processfromfile);
+                }
+            }
+        }
+        else if (evt.getSource() instanceof ProcessHandler) {
+            for (int i = 0; i < processes.size(); i++) {
+                if (evt.getSource() == processes.get(i).processHandler) {
+                    switch (evt.getPropertyName()) {
+                        // Property Name to update
+                        case ("processes"):
+                            ChangeField.firePropertyChange("processes" + i, null, evt.getNewValue());
+                            break;
+                        // Property Name to update
+                        case ("CompletedProcess"):
+                            ChangeField.firePropertyChange("CompletedProcess" + i, null, evt.getNewValue());
+                            break;
+                    }
+                }
+            }
         }
     }
 }
