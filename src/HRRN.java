@@ -1,22 +1,30 @@
-
+/* CS 490 Phase 3
+  Process.java
+  10-20-2021
+  Cameron Ramos, Samuel Strong, Marshall Wright, Edson Jaramillo
+  HRRN information data
+------------------------------------------------------------ */
 public class HRRN extends ProcessHandler {
 
+    // calculation for the algorithm
     @Override
     public ProcessInformation TurnAroundTime() {
-        double maxRatio = 0;
-        ProcessInformation maxProcess = null;
+        double max_ratio = 0.0;
+        double waiting_Time;
+        double ratio;
+        ProcessInformation max = null;
 
         for (ProcessInformation info : processes) {
-            double waitingTime = Process.instance.currentTime - info.arrival_time;
-            double ratio = (waitingTime + info.get_service_time()) / info.get_service_time();
-            if (ratio > maxRatio)
+            waiting_Time = Process.instance.currentTime - info.arrival_time;
+            ratio = (waiting_Time + info.get_service_time()) / info.get_service_time();
+            if (ratio > max_ratio)
             {
-                maxRatio = ratio;
-                maxProcess = info;
+                max_ratio = ratio;
+                max = info;
             }
         }
 
-        return maxProcess;
+        return max;
     }
 
     @Override

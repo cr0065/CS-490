@@ -1,4 +1,4 @@
-/* CS 490 Phase 2
+/* CS 490 Phase 3
   SwingView.java
   10-20-2021
   Cameron Ramos, Samuel Strong, Marshall Wright, Edson Jaramillo
@@ -282,6 +282,7 @@ public class SwingView extends JComponent implements PropertyChangeListener {
         String propertyName = event.getPropertyName();
         if (propertyName.startsWith("processes")) {
             Queue<ProcessInformation> processes = (Queue<ProcessInformation>)event.getNewValue();
+            //  this line in every instance of it parses the line and then separates it by number value
         if (Integer.parseInt(propertyName.substring(9, 10)) == 0) {
             int rows = ProcessnServiceTime.getRowCount();
             for (int i = 0; i < rows; i++) {
@@ -292,6 +293,7 @@ public class SwingView extends JComponent implements PropertyChangeListener {
                         process.process,
                         Double.toString(process.get_remaining_service_time())});
             }
+            // Table Update
             ProcessnServiceTime.fireTableDataChanged();
         } else {
             int rows = ProcessnServiceTime2.getRowCount();
@@ -303,6 +305,7 @@ public class SwingView extends JComponent implements PropertyChangeListener {
                         process.process,
                         Double.toString(process.get_remaining_service_time())});
             }
+            // Table Update
             ProcessnServiceTime2.fireTableDataChanged();
         }
         } else if (propertyName.startsWith("CompletedProcess")) {
@@ -313,6 +316,7 @@ public class SwingView extends JComponent implements PropertyChangeListener {
                     StatsProcesses.removeRow(0);
                 }
                 for (ProcessInformation newprocess : processes) {
+                    // Table Update
                     StatsProcesses.addRow(new String[]{
                             newprocess.process,
                             Double.toString(newprocess.get_arrival_time()),
@@ -322,6 +326,7 @@ public class SwingView extends JComponent implements PropertyChangeListener {
                             String.format("%.2f", newprocess.get_nTAT())
                     });
                 }
+                // Table Update
                 StatsProcesses.fireTableDataChanged();
             } else {
                 int rows = StatsProcesses2.getRowCount();
@@ -329,15 +334,17 @@ public class SwingView extends JComponent implements PropertyChangeListener {
                     StatsProcesses2.removeRow(0);
                 }
                 for (ProcessInformation newprocess : processes) {
+                    // Table Update
                     StatsProcesses2.addRow(new String[]{
                             newprocess.process,
                             Double.toString(newprocess.get_arrival_time()),
                             Double.toString(newprocess.get_service_time()),
                             Double.toString(newprocess.get_finish_time()),
-                            String.format("%.3f", newprocess.get_TAT()),
-                            String.format("%.3f", newprocess.get_nTAT())
+                            String.format("%.2f", newprocess.get_TAT()),
+                            String.format("%.2f", newprocess.get_nTAT())
                     });
                 }
+                // Table Update
                 StatsProcesses2.fireTableDataChanged();
             }
         }

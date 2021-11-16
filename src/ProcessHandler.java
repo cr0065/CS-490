@@ -58,9 +58,9 @@ public abstract class ProcessHandler {
     {
         ChangeField.addPropertyChangeListener(listener);
     }
-
+    // Ties the TurnAroundTime Function to the processHandler so it may be overridden
     public abstract ProcessInformation TurnAroundTime();
-
+    // Ties the DoOver Function to the processHandler so it may be overridden
     public abstract boolean DoOver();
 
 }
