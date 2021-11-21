@@ -1,2 +1,2 @@
 # CS-490
-Basically just does Phase 1 of the assignment no longer needs use of netbeans however, GUI still needs a little work to look neat. 
+Phase 3 of the assignment splits the process up to handle instances of HRRN and RR algorithm appropriately. 
